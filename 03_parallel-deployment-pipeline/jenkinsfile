@@ -1,0 +1,59 @@
+// Jenkins pipeline with parallel deployment stages
+
+pipeline {
+
+    // Run the pipeline on any available Jenkins agent
+    agent any
+
+    stages {
+
+        // Stage 1: Clone Source Code
+        stage('CLONE SCM') {
+            steps {
+                // Clone code from GitHub repository
+                echo 'Cloning source code from GitHub...'
+                git branch: 'main', url: 'https://github.com/Sandeep-akula-01/mindcircuit16d.git'
+            }
+        }
+
+        // Stage 2: Build Project
+        stage('Build Artifact') {
+            steps {
+                // Build the project using Maven
+                echo 'Building project using Maven...'
+                sh 'mvn clean install'
+            }
+        }
+
+        // Stage 3: Deploy to Multiple Environments in Parallel
+        stage('Deploy to Multiple Environments') {
+            parallel {
+
+                // Deploy to Lab environment
+                stage('Lab') {
+                    steps {
+                        echo 'Deploying on LAB environment...'
+                        // Add deployment steps for LAB Tomcat server
+                    }
+                }
+
+                // Deploy to SBOX environment
+                stage('sbox') {
+                    steps {
+                        echo 'Deploying on SBOX environment...'
+                        // Add deployment steps for SBOX Tomcat server
+                    }
+                }
+
+                // Deploy to UAT environment
+                stage('UAT') {
+                    steps {
+                        echo 'Deploying on UAT environment...'
+                        // Add deployment steps for UAT Tomcat server
+                    }
+                }
+            }
+        }
+    }
+}
+

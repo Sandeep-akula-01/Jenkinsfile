@@ -1,0 +1,17 @@
+// This is a simple Jenkins Declarative Pipeline
+
+pipeline {
+    // 'agent any' means this pipeline can run on any available Jenkins agent
+    agent any
+
+    stages {
+        // A stage is a block that contains a set of steps
+        stage('Hello') {
+            steps {
+                // 'echo' prints a message to the Jenkins console output
+                echo 'Hello World'
+            }
+        }
+    }
+}
+

@@ -1,0 +1,69 @@
+// Jenkins pipeline using try and catch blocks for 3 stages
+
+pipeline {
+    // Run the pipeline on any available Jenkins agent
+    agent any
+
+    stages {
+
+        // Stage 1: Clean Workspace
+        stage('Clean Workspace') {
+            steps {
+                // Clean the Jenkins workspace before starting the build
+                cleanWs()
+            }
+        }
+
+        // Stage 2: Clone Code from GitHub
+        stage('CLONE GITHUB CODE') {
+            steps {
+                script {
+                    // Use try-catch to handle errors during cloning
+                    try {
+                        echo 'Cloning source code from GitHub...'
+                        git branch: 'main', url: 'https://github.com/Sandeep-akula-01/mindcircuit16d.git'
+                    } catch (Exception e) {
+                        echo "Stage 1 failed: ${e.message}"
+                    }
+                }
+            }
+        }
+
+        // Stage 3: Build the Project
+        stage('BUILDING THE CODE') {
+            steps {
+                script {
+                    // Use try-catch to handle build errors
+                    try {
+                        echo 'Building project using Maven...'
+                        sh 'mvn clean install'
+                    } catch (Exception e) {
+                        echo "Stage 2 failed: ${e.message}"
+                    }
+                }
+            }
+        }
+
+        // Stage 4: Deploy to Tomcat
+        stage('DEPLOY') {
+            steps {
+                script {
+                    // Use try-catch to handle deployment errors
+                    try {
+                        echo 'Deploying .war file to Tomcat server...'
+                        deploy adapters: [tomcat9(
+                            credentialsId: 'tomcat',
+                            path: '',
+                            url: 'http://43.204.237.107:8080/'
+                        )],
+                        contextPath: 'Try_catch',
+                        war: '**/*.war'
+                    } catch (Exception e) {
+                        echo "Stage 3 failed: ${e.message}"
+                    }
+                }
+            }
+        }
+    }
+}
+

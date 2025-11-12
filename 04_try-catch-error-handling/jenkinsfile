@@ -1,0 +1,37 @@
+// Jenkins pipeline using try and catch blocks for error handling
+
+pipeline {
+
+    // Run the pipeline on any available Jenkins agent
+    agent any
+
+    stages {
+
+        // Stage 1: Clone Source Code from GitHub
+        stage('CLONE GITHUB CODE') {
+            steps {
+                script {
+                    // Using try-catch to handle errors safely
+                    try {
+                        echo 'Cloning source code from GitHub...'
+                        git branch: 'main', url: 'https://github.com/Sandeep-akula-01/mindcircuit16d.git'
+                    } catch (Exception e) {
+                        // Print error message if cloning fails
+                        echo "Stage 1 failed: ${e.message}"
+                    }
+                }
+            }
+        }
+
+        // Stage 2: Build Project
+        stage('Build Artifact') {
+            steps {
+                // Build the code using Maven
+                echo 'Building project using Maven...'
+                // Uncomment the below line to enable Maven build
+                // sh 'mvn clean install'
+            }
+        }
+    }
+}
+

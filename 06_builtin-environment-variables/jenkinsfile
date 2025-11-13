@@ -1,0 +1,36 @@
+// Jenkins pipeline to display built-in environment variables
+
+pipeline {
+    // Run the pipeline on any available Jenkins agent
+    agent any
+
+    stages {
+
+        // Stage 1: Show Built-in Environment Variables
+        stage('Show Built-in Env Variables') {
+            steps {
+                // Display common Jenkins environment variables in console
+                echo "Job Name: $JOB_NAME"                     // Name of the Jenkins job
+                echo "Build Number: ${env.BUILD_NUMBER}"       // Auto-incremented build number
+                echo "Workspace: ${env.WORKSPACE}"             // Path where code is checked out
+                echo "Build ID: ${env.BUILD_ID}"               // Unique ID for this build
+                echo "Node Name: ${env.NODE_NAME}"             // Name of the Jenkins agent
+                echo "Executor Number: ${env.EXECUTOR_NUMBER}" // Executor slot running the job
+                // echo "Git Branch: ${env.GIT_BRANCH}"        // Uncomment if Git branch info is available
+            }
+        }
+
+        // Stage 2: Run Shell Script with Env Vars
+        stage('Run Script with Env Vars') {
+            steps {
+                // Access environment variables inside a shell script
+                sh '''
+                    echo "We are running job: $JOB_NAME"
+                    echo "This is build number: $BUILD_NUMBER"
+                    echo "Workspace is: $WORKSPACE"
+                '''
+            }
+        }
+    }
+}
+

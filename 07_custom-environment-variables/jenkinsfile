@@ -1,0 +1,55 @@
+// Jenkins pipeline using custom environment variables
+
+pipeline {
+    // Run the pipeline on any available Jenkins agent
+    agent any
+
+    // Define custom environment variables for reuse
+    environment {
+        GIT_BRANCH = 'main'                                    // Git branch to clone
+        GIT_URL = 'https://github.com/Sandeep-akula-01/mindcircuit16d.git'  // Git repository URL
+        MAVEN_CMD = 'mvn clean install'                        // Maven build command
+        TOMCAT_URL = 'http://43.204.237.107:8080/'             // Tomcat server URL
+        TOMCAT_CREDENTIALS_ID = 'tomcat'                       // Jenkins credentials ID for Tomcat
+        CONTEXT_PATH = 'Custom_ENV'                            // Application context path
+        WAR_FILE = '**/*.war'                                  // WAR file location
+    }
+
+    stages {
+
+        // Stage 1: Clone Source Code
+        stage('Clone SCM') {
+            steps {
+                // Clone the GitHub repository
+                echo "Cloning source code from ${GIT_URL} (branch: ${GIT_BRANCH})"
+                git branch: "${GIT_BRANCH}", url: "${GIT_URL}"
+            }
+        }
+
+        // Stage 2: Build Project
+        stage('Build Artifact') {
+            steps {
+                // Build the project using Maven command
+                echo "Building artifact using command: ${MAVEN_CMD}"
+                sh "${MAVEN_CMD}"
+            }
+        }
+
+        // Stage 3: Deploy to Tomcat
+        stage('Deploy to Tomcat') {
+            steps {
+                // Deploy the WAR file to Tomcat using defined environment variables
+                echo "Deploying ${WAR_FILE} to Tomcat at ${TOMCAT_URL} (context: ${CONTEXT_PATH})"
+                deploy adapters: [
+                    tomcat9(
+                        alternativeDeploymentContext: '',
+                        credentialsId: "${TOMCAT_CREDENTIALS_ID}",
+                        path: '',
+                        url: "${TOMCAT_URL}"
+                    )
+                ], contextPath: "${CONTEXT_PATH}", war: "${WAR_FILE}"
+            }
+        }
+    }
+}
+

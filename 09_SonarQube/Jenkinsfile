@@ -1,0 +1,50 @@
+#pipeline with sonarqube:
+
+pipeline {
+
+    agent any
+	
+	tools {
+	maven 'Maven_3.9.11'
+	}
+	
+    stages {
+	
+        stage('CLONE SCM') {
+            steps {
+                echo 'This stage clones SC from GIT repo'				
+				git branch: 'main', url: 'https://github.com/devopstraininghub/mindcircuit16d.git'
+            }
+        }
+		
+		
+		stage('sonarqube scan') {
+            steps {
+                echo 'This stage scans the code using sonarqube'
+                sh 'ls -ltrh'
+                
+                sh ''' mvn sonar:sonar \\
+                      -Dsonar.host.url=http://3.80.201.136:9000 \\
+                      -Dsonar.login=squ_ec23fffbc704f6a3530e15c00412e8d4ddc39d8b'''
+            }
+    	}		
+		
+        stage('Build Artifact') {
+            steps {
+                echo 'This stage builds the code using maven'
+				sh 'mvn clean install'			
+				
+            }
+        }
+		
+        stage('Deploy to Tomcat') {
+            steps {
+                echo 'This stage deploys .war to tomcat webserver'
+         //       deploy adapters: [tomcat9(alternativeDeploymentContext: '', credentialsId: 'tomcat', path: '', url: 'http://44.223.26.72:8090/')], contextPath: 'MC-APP', war: '**/*.war'
+            }
+        }		
+		
+    }
+}
+
+

@@ -1,4 +1,4 @@
-// Jenkins pipeline using try and catch blocks for error handling
+//Jenkins pipeline using try and catch blocks for error handling
 
 pipeline {
 

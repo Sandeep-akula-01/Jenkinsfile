@@ -1,4 +1,4 @@
-// Jenkins pipeline to build and deploy a Maven project on Tomcat
+//Jenkins pipeline to build and deploy a Maven project on Tomcat
 
 pipeline {
     // Run the pipeline on any available Jenkins agent

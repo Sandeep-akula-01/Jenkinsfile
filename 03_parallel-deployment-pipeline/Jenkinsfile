@@ -1,4 +1,4 @@
-// Jenkins pipeline with parallel deployment stages
+//Jenkins pipeline with parallel deployment stages
 
 pipeline {
 

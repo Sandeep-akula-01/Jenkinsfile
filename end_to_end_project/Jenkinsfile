@@ -1,0 +1,116 @@
+pipeline {
+    agent any
+
+     tools { 
+        maven 'maven3' 
+    }
+	
+    stages {
+        stage('Clean Workspace') {
+    steps {
+        deleteDir()
+            }
+        }
+	
+    stage('Checkout') { 
+            steps { 
+                echo 'Cloning GIT HUB Repo' 
+                // Clone the specified branch from the GitHub repository 
+                git branch: 'main', url: 'https://github.com/Sandeep-akula-01/Java_Project.git'
+            }   
+        } 
+	
+	
+      stage('SonarQube Scan') {
+      steps {
+             echo 'Scanning project'
+            sh 'ls -ltr'
+        
+        sh '''
+            mvn sonar:sonar \
+                -Dsonar.host.url=http://3.111.147.237:9000 \
+                -Dsonar.login=squ_e144fafcbd2c69c9cb42c393323f4e836a637b3b
+        '''
+         }
+       }
+	
+        stage('Build Artifact') { 
+            steps { 
+                echo 'Build Artifact' 
+                sh 'mvn clean package' 
+            } 
+        } 
+	
+	
+	
+      stage('Build Docker Image') { 
+            steps { 
+                echo 'Build Docker Image' 
+                // Build the Docker image using the Dockerfile in the project 
+                // Tag the image with the current build number 
+                sh 'docker build -t sandeepakula01/mydocker_repo:${BUILD_NUMBER} -f Dockerfile .' 
+            } 
+        } 
+	
+      stage('Scan Docker Image using Trivy') { 
+            steps { 
+                echo 'scanning Image' 
+               
+               
+                sh 'trivy image sandeepakula01/mydocker_repo:${BUILD_NUMBER}' 
+            } 
+        } 
+	
+	
+       stage('Push to Docker Hub') { 
+            steps { 
+                script { 
+                 
+                  	withCredentials([string(credentialsId: 'dockerhub', variable: 'dockerhub')]) {
+                         sh 'docker login -u sandeepakula01 -p ${dockerhub}' 
+	
+                      }
+                    // Push the Docker image to Docker Hub 
+                    sh 'docker push sandeepakula01/mydocker_repo:${BUILD_NUMBER}' 
+                    echo 'Pushed to Docker Hub' 
+                } 
+            } 
+        } 
+	
+	
+
+       stage('Update Deployment File') { 
+            environment { 
+                GIT_REPO_NAME = "Java_Project" 
+                GIT_USER_NAME = "Sandeep-akula-01" 
+            } 
+            steps { 
+                echo 'Update Deployment File' 
+				
+				withCredentials([string(credentialsId: 'githubtoken', variable: 'githubtoken')]) {
+    // some block
+}
+              
+                withCredentials([string(credentialsId: 'githubtoken', variable: 'githubtoken')]) { 
+                    sh ''' 
+                        # Configure git user 
+                        git config user.email "sandeepsandy958168@gmail.com" 
+                        git config user.name "Sandeep-akula-01" 
+						
+                        # Replace the tag in the deployment YAML file with the current buil  number 						
+                        sed -i "s/mydocker_repo:.*/mydocker_repo:${BUILD_NUMBER}/g" deploymentfiles/deployment.yaml 
+						
+						
+                        #Stage all changes 
+
+                        git add . 
+                        # Commit changes with a message containing the build number 
+                        git commit -m "Update deployment image to version ${BUILD_NUMBER}" 
+                        #Push changes to the main branch of the GitHub repository 
+                        git push https://${githubtoken}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main ''' 
+                } 
+            } 
+        } 
+         
+    } 
+}
